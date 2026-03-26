@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/athan-app/' : '/',
-  server: { port: 4000, open: true },
+  base: '/',
+  server: { port: 4000 },
   build:  { outDir: 'dist', sourcemap: true },
 });
