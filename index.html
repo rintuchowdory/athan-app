@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Athan — Prayer Times & Quran</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    <div class="app-title">Athan · Prayer Times · Quran</div>
+  </div>
+  <div class="date-strip">
+    <span id="greg-date">—</span>
+    <span class="hijri" id="hijri-date">—</span>
+    <button class="loc-btn" onclick="showPanel('settings')">📍 <span id="city-name">Loading…</span></button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="next-card">
+    <div class="next-label">NEXT PRAYER</div>
+    <div class="next-name" id="next-name">—</div>
+    <div class="next-ar"   id="next-ar">—</div>
+    <div class="countdown" id="countdown">--:--:--</div>
+    <div class="cd-label">HOURS · MINUTES · SECONDS</div>
+    <button class="hero-btn" id="hero-btn"><span id="hero-icon">▶</span> Play Athan</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPanel('prayers')"><span class="ti">🕌</span>Prayers</button>
+  <button class="tab"        onclick="showPanel('athan')"  ><span class="ti">📢</span>Athan</button>
+  <button class="tab"        onclick="showPanel('quran')"  ><span class="ti">📖</span>Quran</button>
+  <button class="tab"        onclick="showPanel('qibla')"  ><span class="ti">🧭</span>Qibla</button>
+  <button class="tab"        onclick="showPanel('settings')"><span class="ti">⚙️</span>Settings</button>
+</div>
+
+<div class="content">
+  <div class="panel active" id="panel-prayers">
+    <div class="slabel">Today's Prayers</div>
+    <div class="prayer-list" id="prayer-list"><div class="loading"><div class="spin"></div>Loading…</div></div>
+    <div class="slabel" style="margin-top:22px">Additional Times</div>
+    <div class="prayer-list" id="extra-list"></div>
+  </div>
+
+  <div class="panel" id="panel-athan">
+    <div class="slabel">Choose Athan Style</div>
+    <div class="athan-grid">
+      <div class="athan-card selected"><div class="a-icon">🕋</div><div class="a-name">Makkah</div><div class="a-place">Grand Mosque</div></div>
+      <div class="athan-card"><div class="a-icon">🌙</div><div class="a-name">Madinah</div><div class="a-place">Prophet's Mosque</div></div>
+      <div class="athan-card"><div class="a-icon">🎵</div><div class="a-name">Al-Aqsa</div><div class="a-place">Jerusalem</div></div>
+      <div class="athan-card"><div class="a-icon">🌟</div><div class="a-name">Egypt Classic</div><div class="a-place">Cairo Style</div></div>
+    </div>
+    <div class="slabel">Now Playing</div>
+    <div class="audio-player">
+      <div class="pl-title" id="athan-pl-title">Makkah Athan</div>
+      <div class="pl-sub"   id="athan-pl-sub">Grand Mosque — اذان</div>
+      <div class="progress-bar" id="athan-bar"><div class="progress-fill" id="athan-fill"></div></div>
+      <div class="pl-controls">
+        <button class="ctrl-btn" id="athan-restart">⟲</button>
+        <button class="pp-btn"   id="athan-pp">▶</button>
+        <button class="ctrl-btn" id="athan-stop">■</button>
+        <span class="time-disp"><span id="athan-cur">0:00</span> / <span id="athan-dur">—</span></span>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text2);margin-top:10px;text-align:center">⚠️ If streaming fails, synthesized tone plays automatically.</p>
+  </div>
+
+  <div class="panel" id="panel-quran">
+    <input class="q-search" id="q-search" placeholder="Search surah by name or number…" oninput="filterSurahs(this.value)"/>
+    <div class="slabel">Mishary Al-Afasy · 114 Surahs</div>
+    <div class="surah-list" id="surah-list"></div>
+    <div class="slabel">Player</div>
+    <div class="audio-player">
+      <div class="pl-title" id="quran-pl-title">Select a Surah</div>
+      <div class="pl-sub"   id="quran-pl-sub">Tap any surah to begin</div>
+      <div class="progress-bar" id="quran-bar"><div class="progress-fill" id="quran-fill"></div></div>
+      <div class="pl-controls">
+        <button class="ctrl-btn" id="quran-prev">⏮</button>
+        <button class="pp-btn"   id="quran-pp">▶</button>
+        <button class="ctrl-btn" id="quran-next">⏭</button>
+        <span class="time-disp"><span id="quran-cur">0:00</span> / <span id="quran-dur">—</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-qibla">
+    <div class="qibla-wrap">
+      <div class="compass">
+        <div class="c-ring"></div>
+        <span class="c-dir cn">N</span><span class="c-dir cs">S</span>
+        <span class="c-dir ce">E</span><span class="c-dir cw">W</span>
+        <div class="needle" id="qibla-needle"></div>
+        <div class="kaaba-ic" id="kaaba-ic" style="display:none">🕋</div>
+      </div>
+      <div class="qibla-deg" id="qibla-deg">—°</div>
+      <div class="qibla-lbl">Direction from North (clockwise)</div>
+      <div class="info-card">
+        <div class="info-row"><span class="info-k">Status</span><span class="info-v" id="qibla-status">Detecting…</span></div>
+        <div class="info-row"><span class="info-k">Your Location</span><span class="info-v" id="qibla-loc">—</span></div>
+        <div class="info-row"><span class="info-k">Makkah</span><span class="info-v">21.4225° N, 39.8262° E</span></div>
+      </div>
+      <button class="city-btn recalc-btn" onclick="loadQibla()">🔄 Recalculate</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-settings">
+    <div class="slabel">Location</div>
+    <div class="city-row">
+      <input class="city-in" id="city-in" placeholder="City (e.g. Berlin)" value="Cologne"/>
+      <select class="s-sel" id="country-in">
+        <option value="Germany" selected>Germany</option>
+        <option value="United States">USA</option>
+        <option value="United Kingdom">UK</option>
+        <option value="France">France</option>
+        <option value="Turkey">Turkey</option>
+        <option value="Egypt">Egypt</option>
+        <option value="Saudi Arabia">Saudi Arabia</option>
+        <option value="Pakistan">Pakistan</option>
+        <option value="India">India</option>
+        <option value="Indonesia">Indonesia</option>
+        <option value="Malaysia">Malaysia</option>
+        <option value="Bangladesh">Bangladesh</option>
+        <option value="Nigeria">Nigeria</option>
+        <option value="Morocco">Morocco</option>
+      </select>
+      <button class="city-btn" onclick="applyCity()">Search</button>
+    </div>
+    <div class="slabel">Calculation Method</div>
+    <div class="s-card">
+      <div class="s-row">
+        <div><div class="s-lbl">Method</div><div class="s-sub">Affects Fajr &amp; Isha angles</div></div>
+        <select class="s-sel" id="method-sel" onchange="applyCity()">
+          <option value="2" selected>ISNA (North America)</option>
+          <option value="1">Karachi University</option>
+          <option value="3">Muslim World League</option>
+          <option value="4">Umm al-Qura, Makkah</option>
+          <option value="5">Egyptian Authority</option>
+          <option value="13">Turkey — Diyanet</option>
+          <option value="15">Moscow</option>
+          <option value="12">Gulf Region</option>
+        </select>
+      </div>
+    </div>
+    <div class="slabel">About</div>
+    <div class="s-card">
+      <div class="s-row"><div><div class="s-lbl">Prayer Times</div><div class="s-sub">aladhan.com public API</div></div></div>
+      <div class="s-row"><div><div class="s-lbl">Quran Audio</div><div class="s-sub">cdn.islamic.network · Mishary Al-Afasy</div></div></div>
+      <div class="s-row"><div><div class="s-lbl">Version</div><div class="s-sub">1.0.0 — Vite + Vanilla JS</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<audio id="athan-audio"></audio>
+<audio id="quran-audio"></audio>
+</body>
+</html>
